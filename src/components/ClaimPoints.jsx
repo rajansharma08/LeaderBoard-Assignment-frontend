@@ -6,6 +6,7 @@ import {
   showSuccessToast,
   showWarnToast,
 } from "../utils/toast";
+const BACKEND_API = import.meta.env.VITE_BACKEND_API;
 
 const ClaimPoints = ({ selectedUser, refreshLeaderboard, onResetUser }) => {
   const handleClaim = async () => {
@@ -15,7 +16,7 @@ const ClaimPoints = ({ selectedUser, refreshLeaderboard, onResetUser }) => {
     }
 
     try {
-      const res = await axios.post(`http://localhost:5000/api/claim`, {
+      const res = await axios.post(`${BACKEND_API}/api/claim`, {
         userId: selectedUser,
       });
 
