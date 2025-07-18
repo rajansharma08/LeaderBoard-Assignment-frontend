@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { showErrorToast, showSuccessToast } from "../utils/toast";
 
 const BACKEND_API = import.meta.env.VITE_BACKEND_API;
 
@@ -14,10 +15,32 @@ const UserSelector = ({ selectedUser, setSelectedUser, refreshUsers }) => {
 
   const addUser = async () => {
     if (!newUser) return;
-    await axios.post(`${BACKEND_API}/api/users`, { name: newUser });
-    setNewUser("");
-    fetchUsers();
-    refreshUsers(); // Update leaderboard as well
+
+    try {
+      // Step 1: Fetch all users from DB
+      const { data: users } = await axios.get(`${BACKEND_API}/api/users`);
+
+      // Step 2: Check if user already exists (case-insensitive match)
+      const userExists = users.some(
+        (user) => user.name.toLowerCase() === newUser.trim().toLowerCase()
+      );
+
+      if (userExists) {
+        showErrorToast(`${newUser} already exists in the leaderboard.`);
+        return;
+      }
+
+      // Step 3: Add the user
+      await axios.post(`${BACKEND_API}/api/users`, { name: newUser.trim() });
+
+      setNewUser("");
+      fetchUsers();
+      refreshUsers();
+      showSuccessToast(`${newUser} added to the leaderboard with 0 points.`);
+    } catch (error) {
+      console.error("Error adding user:", error);
+      showErrorToast("Something went wrong while adding the user.");
+    }
   };
 
   useEffect(() => {
